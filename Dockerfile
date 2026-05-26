@@ -24,8 +24,6 @@ RUN mkdir -p /app/store_creds \
     && chown -R app:app /app/store_creds \
     && chmod 755 /app/store_creds
 
-USER app
-
 # Expose port (use default of 8000 if PORT not set)
 EXPOSE 8000
 # Expose additional port if PORT environment variable is set to a different value
@@ -40,6 +38,9 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 ENV TOOL_TIER=""
 ENV TOOLS=""
 
-# Use entrypoint for the base command and CMD for args
-ENTRYPOINT ["/bin/sh", "-c"]
-CMD ["uv run main.py --transport streamable-http ${TOOL_TIER:+--tool-tier \"$TOOL_TIER\"} ${TOOLS:+--tools $TOOLS}"]
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+USER root
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
